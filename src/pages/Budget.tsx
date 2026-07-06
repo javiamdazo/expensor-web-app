@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import { useAppStore, caseTotals } from '../store/useAppStore';
 import { formatCurrency, parseFlexibleNumber } from '../lib/format';
-import {
-  buttonDangerClass,
-  buttonPrimaryClass,
-  buttonSecondaryClass,
-  cardClass,
-  inputClass,
-} from '../lib/ui';
+import { Card, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 
 function AmountInput({
   value,
@@ -18,8 +14,8 @@ function AmountInput({
 }) {
   const [text, setText] = useState(value.toString());
   return (
-    <input
-      className={`${inputClass} w-28 text-right tabular-nums`}
+    <Input
+      className="w-[130px] text-right"
       value={text}
       onChange={(e) => setText(e.target.value)}
       onBlur={() => {
@@ -29,6 +25,33 @@ function AmountInput({
       }}
       inputMode="decimal"
     />
+  );
+}
+
+function ItemRow({
+  name,
+  onRename,
+  monthlyAmount,
+  onAmountCommit,
+  onDelete,
+}: {
+  name: string;
+  onRename: (name: string) => void;
+  monthlyAmount: number;
+  onAmountCommit: (n: number) => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="grid grid-cols-[1fr_130px_100px_70px] items-center gap-2.5 border-b border-border py-2.5 last:border-b-0">
+      <Input value={name} onChange={(e) => onRename(e.target.value)} />
+      <AmountInput value={monthlyAmount} onCommit={onAmountCommit} />
+      <span className="text-right font-mono text-[12.5px] text-muted-foreground">
+        {formatCurrency(monthlyAmount * 12)}
+      </span>
+      <Button variant="link" onClick={onDelete} className="justify-self-end">
+        Eliminar
+      </Button>
+    </div>
   );
 }
 
@@ -50,25 +73,25 @@ function NewItemRow({
   }
 
   return (
-    <div className="flex items-center gap-2 pt-2">
-      <input
-        className={inputClass}
+    <div className="grid grid-cols-[1fr_130px_100px_70px] items-center gap-2.5 py-2.5">
+      <Input
         placeholder={placeholder}
         value={name}
         onChange={(e) => setName(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && submit()}
       />
-      <input
-        className={`${inputClass} w-28 text-right`}
+      <Input
+        className="text-right"
         placeholder="0,00"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && submit()}
         inputMode="decimal"
       />
-      <button className={buttonSecondaryClass} onClick={submit} type="button">
+      <div />
+      <Button variant="primary" size="sm" onClick={submit} className="justify-self-end">
         Añadir
-      </button>
+      </Button>
     </div>
   );
 }
@@ -91,76 +114,58 @@ export function Budget() {
   const [newCategoryName, setNewCategoryName] = useState('');
 
   if (!activeCase) {
-    return <p className="text-sm text-neutral-500">Selecciona o crea un caso primero.</p>;
+    return <p className="text-sm text-muted-foreground">Selecciona o crea un caso primero.</p>;
   }
 
   const totals = caseTotals(activeCase);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-xl font-semibold">Presupuesto · {activeCase.name}</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <h1 className="text-[22px] font-extrabold">Presupuesto · {activeCase.name}</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">
           Importes mensuales. El anual se calcula automáticamente (× 12).
         </p>
       </div>
 
-      <section className={cardClass}>
-        <h2 className="mb-2 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-          Ingresos
-        </h2>
-        <div className="flex flex-col divide-y divide-black/5 dark:divide-white/10">
+      <Card>
+        <CardTitle>Ingresos</CardTitle>
+        <div className="mt-3.5 flex flex-col">
           {activeCase.income.map((inc) => (
-            <div key={inc.id} className="flex items-center gap-2 py-1.5">
-              <input
-                className={inputClass}
-                value={inc.name}
-                onChange={(e) =>
-                  updateIncomeItem(activeCase.id, inc.id, { name: e.target.value })
-                }
-              />
-              <AmountInput
-                value={inc.monthlyAmount}
-                onCommit={(n) =>
-                  updateIncomeItem(activeCase.id, inc.id, { monthlyAmount: n })
-                }
-              />
-              <span className="w-28 text-right text-sm text-neutral-400 tabular-nums">
-                {formatCurrency(inc.monthlyAmount * 12)}
-              </span>
-              <button
-                className={buttonDangerClass}
-                type="button"
-                onClick={() => deleteIncomeItem(activeCase.id, inc.id)}
-              >
-                Eliminar
-              </button>
-            </div>
+            <ItemRow
+              key={inc.id}
+              name={inc.name}
+              onRename={(name) => updateIncomeItem(activeCase.id, inc.id, { name })}
+              monthlyAmount={inc.monthlyAmount}
+              onAmountCommit={(n) =>
+                updateIncomeItem(activeCase.id, inc.id, { monthlyAmount: n })
+              }
+              onDelete={() => deleteIncomeItem(activeCase.id, inc.id)}
+            />
           ))}
+          <NewItemRow
+            placeholder="Nuevo concepto de ingreso"
+            onAdd={(name, amount) => addIncomeItem(activeCase.id, name, amount)}
+          />
         </div>
-        <NewItemRow
-          placeholder="Nuevo concepto de ingreso"
-          onAdd={(name, amount) => addIncomeItem(activeCase.id, name, amount)}
-        />
-        <p className="mt-3 text-right text-sm font-medium tabular-nums">
+        <p className="mt-3 text-right font-mono text-[12.5px] text-muted-foreground">
           Total: {formatCurrency(totals.monthlyIncome)} / mes ·{' '}
           {formatCurrency(totals.annualIncome)} / año
         </p>
-      </section>
+      </Card>
 
       {activeCase.categories.map((cat) => {
         const catTotal = cat.items.reduce((s, it) => s + it.monthlyAmount, 0);
         return (
-          <section key={cat.id} className={cardClass}>
-            <div className="mb-2 flex items-center gap-2">
-              <input
-                className={`${inputClass} max-w-xs font-semibold`}
+          <Card key={cat.id}>
+            <div className="flex items-center justify-between gap-2">
+              <Input
+                className="h-auto max-w-xs border-none bg-transparent p-0 text-[14.5px] font-bold shadow-none focus-visible:ring-0"
                 value={cat.name}
                 onChange={(e) => renameCategory(activeCase.id, cat.id, e.target.value)}
               />
-              <button
-                className={`${buttonDangerClass} ml-auto`}
-                type="button"
+              <Button
+                variant="ghostDanger"
                 onClick={() => {
                   if (confirm(`¿Eliminar la categoría "${cat.name}" y todos sus conceptos?`)) {
                     deleteCategory(activeCase.id, cat.id);
@@ -168,84 +173,68 @@ export function Budget() {
                 }}
               >
                 Eliminar categoría
-              </button>
+              </Button>
             </div>
-            <div className="flex flex-col divide-y divide-black/5 dark:divide-white/10">
+            <div className="mt-3.5 flex flex-col">
               {cat.items.map((it) => (
-                <div key={it.id} className="flex items-center gap-2 py-1.5">
-                  <input
-                    className={inputClass}
-                    value={it.name}
-                    onChange={(e) =>
-                      updateExpenseItem(activeCase.id, cat.id, it.id, {
-                        name: e.target.value,
-                      })
-                    }
-                  />
-                  <AmountInput
-                    value={it.monthlyAmount}
-                    onCommit={(n) =>
-                      updateExpenseItem(activeCase.id, cat.id, it.id, {
-                        monthlyAmount: n,
-                      })
-                    }
-                  />
-                  <span className="w-28 text-right text-sm text-neutral-400 tabular-nums">
-                    {formatCurrency(it.monthlyAmount * 12)}
-                  </span>
-                  <button
-                    className={buttonDangerClass}
-                    type="button"
-                    onClick={() => deleteExpenseItem(activeCase.id, cat.id, it.id)}
-                  >
-                    Eliminar
-                  </button>
-                </div>
+                <ItemRow
+                  key={it.id}
+                  name={it.name}
+                  onRename={(name) =>
+                    updateExpenseItem(activeCase.id, cat.id, it.id, { name })
+                  }
+                  monthlyAmount={it.monthlyAmount}
+                  onAmountCommit={(n) =>
+                    updateExpenseItem(activeCase.id, cat.id, it.id, { monthlyAmount: n })
+                  }
+                  onDelete={() => deleteExpenseItem(activeCase.id, cat.id, it.id)}
+                />
               ))}
+              <NewItemRow
+                placeholder="Nuevo concepto de gasto"
+                onAdd={(name, amount) => addExpenseItem(activeCase.id, cat.id, name, amount)}
+              />
             </div>
-            <NewItemRow
-              placeholder="Nuevo concepto de gasto"
-              onAdd={(name, amount) => addExpenseItem(activeCase.id, cat.id, name, amount)}
-            />
-            <p className="mt-3 text-right text-sm font-medium tabular-nums">
+            <p className="mt-3 text-right font-mono text-[12.5px] text-muted-foreground">
               Total: {formatCurrency(catTotal)} / mes · {formatCurrency(catTotal * 12)} / año
             </p>
-          </section>
+          </Card>
         );
       })}
 
-      <section className={`${cardClass} flex items-center gap-2`}>
-        <input
-          className={inputClass}
-          placeholder="Nombre de la nueva categoría (ej. Ocio)"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && newCategoryName.trim()) {
+      <Card>
+        <div className="flex items-center gap-2.5">
+          <Input
+            placeholder="Nombre de la nueva categoría (ej. Ocio)"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newCategoryName.trim()) {
+                addCategory(activeCase.id, newCategoryName.trim());
+                setNewCategoryName('');
+              }
+            }}
+          />
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (!newCategoryName.trim()) return;
               addCategory(activeCase.id, newCategoryName.trim());
               setNewCategoryName('');
-            }
-          }}
-        />
-        <button
-          className={buttonPrimaryClass}
-          type="button"
-          onClick={() => {
-            if (!newCategoryName.trim()) return;
-            addCategory(activeCase.id, newCategoryName.trim());
-            setNewCategoryName('');
-          }}
-        >
-          Añadir categoría
-        </button>
-      </section>
+            }}
+          >
+            Añadir categoría
+          </Button>
+        </div>
+      </Card>
 
-      <div className={`${cardClass} flex justify-between text-sm font-semibold`}>
+      <Card className="flex items-center justify-between text-sm font-bold">
         <span>Gasto total</span>
-        <span className="tabular-nums">
-          {formatCurrency(totals.monthlyExpense)} / mes · {formatCurrency(totals.annualExpense)} / año
+        <span className="font-mono">
+          {formatCurrency(totals.monthlyExpense)} / mes ·{' '}
+          {formatCurrency(totals.annualExpense)} / año
         </span>
-      </div>
+      </Card>
     </div>
   );
 }

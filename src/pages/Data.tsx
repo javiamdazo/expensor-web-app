@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { downloadCsv, exportStateToCsv, parseCsvToState } from '../lib/csv';
-import { buttonDangerClass, buttonPrimaryClass, buttonSecondaryClass, cardClass } from '../lib/ui';
+import { Card, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 
 export function Data() {
   const cases = useAppStore((s) => s.cases);
@@ -57,41 +58,40 @@ export function Data() {
   }
 
   function handleWipe() {
-    if (confirm('Esto borrará TODOS los casos, presupuestos e histórico guardados en este navegador. ¿Continuar?')) {
+    if (
+      confirm(
+        'Esto borrará TODOS los casos, presupuestos e histórico guardados en este navegador. ¿Continuar?',
+      )
+    ) {
       replaceState({ cases: [], activeCaseId: null, history: [] });
     }
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-xl font-semibold">Datos</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          Todo se guarda automáticamente en el <code>localStorage</code> de este
-          navegador, en este dispositivo. Exporta a CSV para hacer copia de
+        <h1 className="text-[22px] font-extrabold">Datos</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">
+          Todo se guarda automáticamente en este navegador. Exporta a CSV para hacer copia de
           seguridad, moverlo a otro dispositivo o editarlo en Excel/Sheets.
         </p>
       </div>
 
-      <section className={cardClass}>
-        <h2 className="mb-2 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-          Exportar
-        </h2>
-        <p className="mb-3 text-sm text-neutral-500">
+      <Card>
+        <CardTitle>Exportar</CardTitle>
+        <p className="mt-1.5 text-[13px] text-muted-foreground">
           Descarga un único CSV con todos tus casos, presupuestos e histórico.
         </p>
-        <button className={buttonPrimaryClass} type="button" onClick={handleExport}>
+        <Button variant="primary" className="mt-3.5" onClick={handleExport}>
           Descargar CSV
-        </button>
-      </section>
+        </Button>
+      </Card>
 
-      <section className={cardClass}>
-        <h2 className="mb-2 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-          Importar
-        </h2>
-        <p className="mb-3 text-sm text-neutral-500">
-          Carga un CSV exportado previamente (o editado a mano) para restaurar tus
-          datos. Sustituye todo lo que haya en este navegador ahora mismo.
+      <Card>
+        <CardTitle>Importar</CardTitle>
+        <p className="mt-1.5 text-[13px] text-muted-foreground">
+          Carga un CSV exportado previamente para restaurar tus datos. Sustituye todo lo que haya
+          en este navegador ahora mismo.
         </p>
         <input
           ref={fileInputRef}
@@ -100,32 +100,30 @@ export function Data() {
           className="hidden"
           onChange={handleFileChange}
         />
-        <button className={buttonSecondaryClass} type="button" onClick={handleImportClick}>
+        <Button variant="secondary" className="mt-3.5" onClick={handleImportClick}>
           Elegir archivo CSV
-        </button>
-        {importSummary && <p className="mt-3 text-sm text-[#0ca30c]">{importSummary}</p>}
+        </Button>
+        {importSummary && <p className="mt-3 text-sm text-positive">{importSummary}</p>}
         {importErrors.length > 0 && (
-          <ul className="mt-3 list-inside list-disc text-sm text-[#d03b3b]">
+          <ul className="mt-3 list-inside list-disc text-sm text-negative">
             {importErrors.map((err, i) => (
               <li key={i}>{err}</li>
             ))}
           </ul>
         )}
-      </section>
+      </Card>
 
-      <section className={cardClass}>
-        <h2 className="mb-2 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-          Restablecer
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <button className={buttonSecondaryClass} type="button" onClick={handleResetSeed}>
+      <Card>
+        <CardTitle>Restablecer</CardTitle>
+        <div className="mt-3.5 flex gap-3">
+          <Button variant="secondary" onClick={handleResetSeed}>
             Cargar datos de ejemplo
-          </button>
-          <button className={buttonDangerClass} type="button" onClick={handleWipe}>
+          </Button>
+          <Button variant="destructive" onClick={handleWipe}>
             Borrar todos los datos
-          </button>
+          </Button>
         </div>
-      </section>
+      </Card>
     </div>
   );
 }

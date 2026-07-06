@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { currentMonth, formatCurrency, formatMonthLabel, parseFlexibleNumber } from '../lib/format';
-import {
-  buttonDangerClass,
-  buttonPrimaryClass,
-  cardClass,
-  inputClass,
-} from '../lib/ui';
+import { Card } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+import { Button } from '../components/ui/button';
+import { cn } from '../lib/utils';
 
 function AmountInput({
   value,
@@ -17,8 +16,8 @@ function AmountInput({
 }) {
   const [text, setText] = useState(value.toString());
   return (
-    <input
-      className={`${inputClass} w-28 text-right tabular-nums`}
+    <Input
+      className="w-full text-right"
       value={text}
       onChange={(e) => setText(e.target.value)}
       onBlur={() => {
@@ -44,7 +43,7 @@ export function History() {
   const [month, setMonth] = useState(currentMonth());
 
   if (!activeCase) {
-    return <p className="text-sm text-neutral-500">Selecciona o crea un caso primero.</p>;
+    return <p className="text-sm text-muted-foreground">Selecciona o crea un caso primero.</p>;
   }
 
   const entries = history
@@ -54,33 +53,34 @@ export function History() {
   const monthTaken = entries.some((e) => e.month === month);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-xl font-semibold">Histórico · {activeCase.name}</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <h1 className="text-[22px] font-extrabold">Histórico · {activeCase.name}</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">
           Registra los importes reales de cada mes para comparar con el presupuesto.
         </p>
       </div>
 
-      <section className={`${cardClass} flex flex-wrap items-center gap-2`}>
-        <input
+      <Card className="flex flex-wrap items-center gap-3">
+        <Input
           type="month"
-          className={`${inputClass} w-auto`}
+          className="w-auto"
           value={month}
           onChange={(e) => setMonth(e.target.value)}
         />
-        <button
-          className={buttonPrimaryClass}
-          type="button"
+        <Button
+          variant={monthTaken ? 'secondary' : 'primary'}
           disabled={monthTaken}
           onClick={() => addHistoryEntry(activeCase.id, month)}
         >
           {monthTaken ? 'Ese mes ya existe' : 'Crear mes a partir del presupuesto'}
-        </button>
-      </section>
+        </Button>
+      </Card>
 
       {entries.length === 0 && (
-        <p className="text-sm text-neutral-400">Todavía no hay meses registrados para este caso.</p>
+        <p className="text-sm text-muted-foreground">
+          Todavía no hay meses registrados para este caso.
+        </p>
       )}
 
       {entries.map((entry) => {
@@ -92,87 +92,97 @@ export function History() {
           .filter((l) => l.section === 'gasto');
         const totalIngresos = ingresoLines.reduce((s, l) => s + l.amount, 0);
         const totalGastos = gastoLines.reduce((s, l) => s + l.amount, 0);
+        const savings = totalIngresos - totalGastos;
 
         return (
-          <details key={entry.id} className={cardClass}>
-            <summary className="flex cursor-pointer flex-wrap items-center gap-3">
-              <span className="font-semibold">{formatMonthLabel(entry.month)}</span>
-              <span className="text-sm text-[#0ca30c] tabular-nums">
-                +{formatCurrency(totalIngresos)}
-              </span>
-              <span className="text-sm text-[#d03b3b] tabular-nums">
-                -{formatCurrency(totalGastos)}
-              </span>
-              <span
-                className={`text-sm font-medium tabular-nums ${
-                  totalIngresos - totalGastos >= 0 ? 'text-[#0ca30c]' : 'text-[#d03b3b]'
-                }`}
-              >
-                = {formatCurrency(totalIngresos - totalGastos)}
-              </span>
-              <button
-                type="button"
-                className={`${buttonDangerClass} ml-auto`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (confirm(`¿Eliminar el mes ${formatMonthLabel(entry.month)}?`)) {
-                    deleteHistoryEntry(entry.id);
-                  }
-                }}
-              >
-                Eliminar mes
-              </button>
-            </summary>
+          <details
+            key={entry.id}
+            className="rounded-lg border border-border bg-card px-[22px] py-5 text-card-foreground"
+          >
+            <summary className="flex cursor-pointer flex-wrap items-baseline gap-3">
+                <span className="text-[17px] font-extrabold">{formatMonthLabel(entry.month)}</span>
+                <span className="font-mono text-sm font-bold text-positive">
+                  +{formatCurrency(totalIngresos)}
+                </span>
+                <span className="font-mono text-sm font-bold text-negative">
+                  -{formatCurrency(totalGastos)}
+                </span>
+                <span
+                  className={cn(
+                    'font-mono text-sm font-extrabold',
+                    savings >= 0 ? 'text-positive' : 'text-negative',
+                  )}
+                >
+                  = {formatCurrency(savings)}
+                </span>
+                <Button
+                  variant="ghostDanger"
+                  className="ml-auto"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (confirm(`¿Eliminar el mes ${formatMonthLabel(entry.month)}?`)) {
+                      deleteHistoryEntry(entry.id);
+                    }
+                  }}
+                >
+                  Eliminar mes
+                </Button>
+              </summary>
 
-            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div>
-                <h3 className="mb-1 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-                  Ingresos reales
-                </h3>
-                <div className="flex flex-col divide-y divide-black/5 dark:divide-white/10">
-                  {ingresoLines.map((l) => (
-                    <div key={l.index} className="flex items-center gap-2 py-1.5">
-                      <span className="flex-1 text-sm">{l.concept}</span>
-                      <AmountInput
-                        value={l.amount}
-                        onCommit={(n) => updateHistoryLine(entry.id, l.index, { amount: n })}
-                      />
-                    </div>
-                  ))}
+              <div className="mt-4.5 grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <h3 className="mb-1 text-[12.5px] font-bold tracking-wide text-muted-foreground uppercase">
+                    Ingresos reales
+                  </h3>
+                  <div className="flex flex-col">
+                    {ingresoLines.map((l) => (
+                      <div
+                        key={l.index}
+                        className="grid grid-cols-[1fr_100px] items-center gap-2.5 border-b border-border py-[7px] last:border-b-0"
+                      >
+                        <span className="text-[12.5px] text-foreground">{l.concept}</span>
+                        <AmountInput
+                          value={l.amount}
+                          onCommit={(n) => updateHistoryLine(entry.id, l.index, { amount: n })}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="mb-1 text-[12.5px] font-bold tracking-wide text-muted-foreground uppercase">
+                    Gastos reales
+                  </h3>
+                  <div className="flex flex-col">
+                    {gastoLines.map((l) => (
+                      <div
+                        key={l.index}
+                        className="grid grid-cols-[1fr_100px] items-center gap-2.5 border-b border-border py-[7px] last:border-b-0"
+                      >
+                        <span className="text-[12.5px] text-foreground">
+                          {l.category} · {l.concept}
+                        </span>
+                        <AmountInput
+                          value={l.amount}
+                          onCommit={(n) => updateHistoryLine(entry.id, l.index, { amount: n })}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <h3 className="mb-1 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-                  Gastos reales
-                </h3>
-                <div className="flex flex-col divide-y divide-black/5 dark:divide-white/10">
-                  {gastoLines.map((l) => (
-                    <div key={l.index} className="flex items-center gap-2 py-1.5">
-                      <span className="flex-1 text-sm">
-                        {l.category} · {l.concept}
-                      </span>
-                      <AmountInput
-                        value={l.amount}
-                        onCommit={(n) => updateHistoryLine(entry.id, l.index, { amount: n })}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
 
-            <div className="mt-4">
-              <label className="mb-1 block text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-                Notas
-              </label>
-              <textarea
-                className={inputClass}
-                rows={2}
-                value={entry.notes}
-                onChange={(e) => updateHistoryNotes(entry.id, e.target.value)}
-              />
-            </div>
-          </details>
+              <div className="mt-4">
+                <label className="mb-1 block text-[12.5px] font-bold tracking-wide text-muted-foreground uppercase">
+                  Notas
+                </label>
+                <Textarea
+                  rows={2}
+                  value={entry.notes}
+                  onChange={(e) => updateHistoryNotes(entry.id, e.target.value)}
+                />
+              </div>
+            </details>
         );
       })}
     </div>

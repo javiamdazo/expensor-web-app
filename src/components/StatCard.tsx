@@ -1,11 +1,11 @@
-import { cardClass } from '../lib/ui';
+import { cn } from '../lib/utils';
 
 type Tone = 'neutral' | 'good' | 'critical';
 
 const toneClass: Record<Tone, string> = {
-  neutral: 'text-neutral-900 dark:text-neutral-100',
-  good: 'text-[#0ca30c]',
-  critical: 'text-[#d03b3b]',
+  neutral: 'text-foreground',
+  good: 'text-positive',
+  critical: 'text-negative',
 };
 
 interface StatCardProps {
@@ -17,14 +17,12 @@ interface StatCardProps {
 
 export function StatCard({ label, value, sub, tone = 'neutral' }: StatCardProps) {
   return (
-    <div className={cardClass}>
-      <p className="text-sm text-neutral-500 dark:text-neutral-400">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${toneClass[tone]}`}>
+    <div className="rounded-lg border border-border bg-card px-5 py-[18px]">
+      <p className="text-[12.5px] font-semibold text-muted-foreground">{label}</p>
+      <p className={cn('mt-2 font-mono text-[26px] font-bold tabular-nums', toneClass[tone])}>
         {value}
       </p>
-      {sub && (
-        <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">{sub}</p>
-      )}
+      {sub && <p className="mt-1 font-mono text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }

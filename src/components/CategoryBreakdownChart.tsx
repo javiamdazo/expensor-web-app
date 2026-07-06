@@ -1,71 +1,45 @@
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import { formatCurrency } from '../lib/format';
 import { categoricalColor } from '../lib/palette';
-import { usePrefersDark } from '../lib/usePrefersDark';
+import { useTheme } from '../lib/theme';
 
 interface CategoryBreakdownChartProps {
   data: { name: string; monthly: number }[];
 }
 
 export function CategoryBreakdownChart({ data }: CategoryBreakdownChartProps) {
-  const dark = usePrefersDark();
-  const gridColor = dark ? '#2c2c2a' : '#e1e0d9';
-  const inkColor = dark ? '#c3c2b7' : '#52514e';
+  const { theme } = useTheme();
+  const dark = theme === 'dark';
 
   if (data.length === 0) {
     return (
-      <p className="text-sm text-neutral-400">
+      <p className="text-sm text-muted-foreground">
         Añade categorías de gasto en Presupuesto para ver el desglose.
       </p>
     );
   }
 
   const sorted = [...data].sort((a, b) => b.monthly - a.monthly);
+  const max = Math.max(...sorted.map((c) => c.monthly), 1);
 
   return (
-    <ResponsiveContainer width="100%" height={Math.max(180, sorted.length * 42)}>
-      <BarChart data={sorted} layout="vertical" margin={{ left: 8, right: 24 }}>
-        <CartesianGrid stroke={gridColor} horizontal={false} />
-        <XAxis
-          type="number"
-          tickFormatter={(v: number) => formatCurrency(v)}
-          tick={{ fill: inkColor, fontSize: 12 }}
-          axisLine={{ stroke: gridColor }}
-          tickLine={false}
-        />
-        <YAxis
-          type="category"
-          dataKey="name"
-          width={110}
-          tick={{ fill: inkColor, fontSize: 12 }}
-          axisLine={{ stroke: gridColor }}
-          tickLine={false}
-        />
-        <Tooltip
-          formatter={(value) => formatCurrency(Number(value))}
-          contentStyle={{
-            background: dark ? '#1a1a19' : '#fcfcfb',
-            border: `1px solid ${gridColor}`,
-            borderRadius: 8,
-            fontSize: 12,
-            color: dark ? '#ffffff' : '#0b0b0b',
-          }}
-        />
-        <Bar dataKey="monthly" radius={[0, 4, 4, 0]} maxBarSize={22}>
-          {sorted.map((entry, index) => (
-            <Cell key={entry.name} fill={categoricalColor(index, dark)} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="flex flex-col gap-3.5">
+      {sorted.map((cat, i) => (
+        <div key={cat.name} className="grid grid-cols-[110px_1fr_80px] items-center gap-3">
+          <div className="truncate text-[13px] font-semibold text-foreground">{cat.name}</div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-track">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${(cat.monthly / max) * 100}%`,
+                background: categoricalColor(i, dark),
+              }}
+            />
+          </div>
+          <div className="text-right font-mono text-[12.5px] text-muted-foreground">
+            {formatCurrency(cat.monthly)}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
