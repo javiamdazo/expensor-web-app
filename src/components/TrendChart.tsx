@@ -1,16 +1,4 @@
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import { formatCurrency, formatMonthLabel } from '../lib/format';
-import { STATUS, CATEGORICAL_LIGHT, CATEGORICAL_DARK } from '../lib/palette';
-import { usePrefersDark } from '../lib/usePrefersDark';
+import { formatMonthLabel } from '../lib/format';
 
 export interface TrendPoint {
   month: string;
@@ -20,74 +8,50 @@ export interface TrendPoint {
 }
 
 export function TrendChart({ data }: { data: TrendPoint[] }) {
-  const dark = usePrefersDark();
-  const gridColor = dark ? '#2c2c2a' : '#e1e0d9';
-  const inkColor = dark ? '#c3c2b7' : '#52514e';
-  const incomeColor = dark ? CATEGORICAL_DARK[0] : CATEGORICAL_LIGHT[0];
-
   if (data.length === 0) {
     return (
-      <p className="text-sm text-neutral-400">
-        Registra meses en Histórico para ver la evolución de ingresos, gastos y ahorro.
+      <p className="text-sm text-muted-foreground">
+        Registra meses en Histórico para ver la evolución de ingresos y gastos.
       </p>
     );
   }
 
+  const max = Math.max(...data.flatMap((d) => [d.ingresos, d.gastos]), 1);
+  const barHeight = (v: number) => Math.max(10, (v / max) * 80);
+
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data} margin={{ left: 8, right: 16, top: 8 }}>
-        <CartesianGrid stroke={gridColor} vertical={false} />
-        <XAxis
-          dataKey="month"
-          tickFormatter={(m: string) => formatMonthLabel(m)}
-          tick={{ fill: inkColor, fontSize: 12 }}
-          axisLine={{ stroke: gridColor }}
-          tickLine={false}
-        />
-        <YAxis
-          tickFormatter={(v: number) => formatCurrency(v)}
-          tick={{ fill: inkColor, fontSize: 12 }}
-          axisLine={{ stroke: gridColor }}
-          tickLine={false}
-          width={80}
-        />
-        <Tooltip
-          formatter={(value) => formatCurrency(Number(value))}
-          labelFormatter={(m) => formatMonthLabel(String(m))}
-          contentStyle={{
-            background: dark ? '#1a1a19' : '#fcfcfb',
-            border: `1px solid ${gridColor}`,
-            borderRadius: 8,
-            fontSize: 12,
-            color: dark ? '#ffffff' : '#0b0b0b',
-          }}
-        />
-        <Legend wrapperStyle={{ fontSize: 12, color: inkColor }} />
-        <Line
-          type="monotone"
-          dataKey="ingresos"
-          name="Ingresos"
-          stroke={incomeColor}
-          strokeWidth={2}
-          dot={{ r: 3 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="gastos"
-          name="Gastos"
-          stroke={STATUS.critical}
-          strokeWidth={2}
-          dot={{ r: 3 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="ahorro"
-          name="Ahorro"
-          stroke={STATUS.good}
-          strokeWidth={2}
-          dot={{ r: 3 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className="flex flex-col gap-3.5">
+      <div className="flex items-end gap-7 px-2" style={{ height: 120 }}>
+        {data.map((d) => (
+          <div key={d.month} className="flex flex-1 flex-col items-center gap-2">
+            <div className="flex items-end gap-1.5" style={{ height: 80 }}>
+              <div
+                title="Ingresos"
+                className="w-[34px] rounded-t bg-positive"
+                style={{ height: barHeight(d.ingresos) }}
+              />
+              <div
+                title="Gastos"
+                className="w-[34px] rounded-t bg-negative"
+                style={{ height: barHeight(d.gastos) }}
+              />
+            </div>
+            <div className="text-xs font-semibold text-muted-foreground">
+              {formatMonthLabel(d.month)}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-5 border-t border-border pt-3.5">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+          <span className="inline-block size-[9px] rounded-full bg-positive" />
+          Ingresos
+        </div>
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+          <span className="inline-block size-[9px] rounded-full bg-negative" />
+          Gastos
+        </div>
+      </div>
+    </div>
   );
 }

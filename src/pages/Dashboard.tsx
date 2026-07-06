@@ -4,7 +4,8 @@ import { StatCard } from '../components/StatCard';
 import { CategoryBreakdownChart } from '../components/CategoryBreakdownChart';
 import { TrendChart, type TrendPoint } from '../components/TrendChart';
 import { formatCurrency } from '../lib/format';
-import { cardClass, buttonPrimaryClass } from '../lib/ui';
+import { Card, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 
 export function Dashboard() {
   const cases = useAppStore((s) => s.cases);
@@ -14,15 +15,15 @@ export function Dashboard() {
 
   if (!activeCase) {
     return (
-      <div className={cardClass}>
-        <h1 className="text-lg font-semibold">Ningún caso seleccionado</h1>
-        <p className="mt-2 text-sm text-neutral-500">
+      <Card>
+        <h1 className="text-lg font-bold">Ningún caso seleccionado</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Crea tu primer caso para empezar a controlar tus gastos.
         </p>
-        <Link to="/casos" className={`${buttonPrimaryClass} mt-4`}>
-          Ir a Casos
-        </Link>
-      </div>
+        <Button asChild className="mt-4">
+          <Link to="/casos">Ir a Casos</Link>
+        </Button>
+      </Card>
     );
   }
 
@@ -42,15 +43,15 @@ export function Dashboard() {
     });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-xl font-semibold">{activeCase.name}</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <h1 className="text-[22px] font-extrabold">{activeCase.name}</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">
           Resumen del presupuesto mensual y anual.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
         <StatCard
           label="Ingresos mensuales"
           value={formatCurrency(totals.monthlyIncome)}
@@ -71,19 +72,15 @@ export function Dashboard() {
         />
       </div>
 
-      <div className={cardClass}>
-        <h2 className="mb-3 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-          Gasto mensual por categoría
-        </h2>
+      <Card>
+        <CardTitle className="mb-4">Gasto mensual por categoría</CardTitle>
         <CategoryBreakdownChart data={totals.categoryTotals} />
-      </div>
+      </Card>
 
-      <div className={cardClass}>
-        <h2 className="mb-3 text-sm font-semibold text-neutral-600 dark:text-neutral-300">
-          Evolución histórica
-        </h2>
+      <Card>
+        <CardTitle className="mb-2">Evolución histórica</CardTitle>
         <TrendChart data={trendData} />
-      </div>
+      </Card>
     </div>
   );
 }
