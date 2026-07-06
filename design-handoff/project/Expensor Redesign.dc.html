@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'Manrope', sans-serif; background: #e4e4e7; }
+    * { box-sizing: border-box; }
+    ::selection { background: #a1a1aa55; }
+  </style>
+</helmet>
+
+<div style="{{ canvasStyle }}">
+
+  <div style="{{ introStyle }}">
+    <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#71717a;">Rediseño · Expensor</div>
+    <div style="font-size:28px;font-weight:800;color:#18181b;margin-top:6px;">Dos direcciones con componentes shadcn/ui</div>
+    <div style="font-size:15px;color:#52525b;margin-top:8px;max-width:720px;line-height:1.55;">
+      Mismo modelo de datos, dos tratamientos de layout — <a href="#1a" style="color:#18181b;font-weight:700;">1a: Sidebar + KPIs</a> y
+      <a href="#1b" style="color:#18181b;font-weight:700;">1b: Topnav + tablas densas</a>. Cada uno incluye las 5 pantallas (Resumen, Presupuesto, Histórico, Casos, Datos) y un selector claro/oscuro.
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- OPTION 1A — SIDEBAR LAYOUT                                     -->
+  <!-- ============================================================= -->
+  <section id="1a" style="{{ optionWrapStyle }}">
+    <div style="{{ badgeRowStyle }}">
+      <div style="{{ badgeStyle }}">1a</div>
+      <div style="font-size:15px;font-weight:700;color:#18181b;">Sidebar + tarjetas KPI</div>
+    </div>
+
+    <div style="{{ a.frameStyle }}">
+      <!-- Sidebar -->
+      <div style="{{ a.sidebarStyle }}">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 20px 20px;">
+          <div style="{{ a.logoBoxStyle }}">€</div>
+          <div style="font-size:16px;font-weight:800;letter-spacing:-0.01em;">Expensor</div>
+        </div>
+
+        <div style="padding:0 12px;display:flex;flex-direction:column;gap:2px;">
+          <sc-for list="{{ a.navItems }}" as="item" hint-placeholder-count="5">
+            <div style="{{ item.style }}" onClick="{{ item.onClick }}">
+              <span style="{{ item.iconStyle }}" dangerouslySetInnerHTML="{{ item.iconHtml }}"></span>
+              <span>{{ item.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:auto;padding:16px 20px;border-top:1px solid {{ a.t.border }};">
+          <div style="{{ a.themeToggleRow }}">
+            <span style="font-size:12px;color:{{ a.t.muted }};font-weight:600;">Tema</span>
+            <div style="{{ a.themeSwitchStyle }}" onClick="{{ a.toggleTheme }}">
+              <div style="{{ a.themeKnobStyle }}"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div style="{{ a.mainStyle }}">
+        <div style="{{ a.topbarStyle }}">
+          <select style="{{ a.selectStyle }}" value="{{ a.activeCase }}" onChange="{{ a.onCaseChange }}">
+            <sc-for list="{{ a.caseOptions }}" as="c" hint-placeholder-count="2">
+              <option value="{{ c.id }}">{{ c.label }}</option>
+            </sc-for>
+          </select>
+          <div style="{{ a.userChipStyle }}">JG</div>
+        </div>
+
+        <div style="{{ a.contentStyle }}">
+
+          <!-- RESUMEN -->
+          <sc-if value="{{ a.isResumen }}" hint-placeholder-val="{{ true }}">
+            <div style="{{ a.pageHeadStyle }}">
+              <div style="font-size:22px;font-weight:800;">{{ a.caseData.label }}</div>
+              <div style="font-size:13px;color:{{ a.t.muted }};margin-top:4px;">Resumen del presupuesto mensual y anual.</div>
+            </div>
+
+            <div style="{{ a.kpiRowStyle }}">
+              <div style="{{ a.cardStyle }}">
+                <div style="{{ a.kpiLabelStyle }}">Ingresos mensuales</div>
+                <div style="{{ a.kpiValuePosStyle }}">{{ a.fmtIncomeM }}</div>
+                <div style="{{ a.kpiSubStyle }}">{{ a.fmtIncomeA }} / año</div>
+              </div>
+              <div style="{{ a.cardStyle }}">
+                <div style="{{ a.kpiLabelStyle }}">Gastos mensuales</div>
+                <div style="{{ a.kpiValueNegStyle }}">{{ a.fmtExpenseM }}</div>
+                <div style="{{ a.kpiSubStyle }}">{{ a.fmtExpenseA }} / año</div>
+              </div>
+              <div style="{{ a.cardStyle }}">
+                <div style="{{ a.kpiLabelStyle }}">Ahorro mensual</div>
+                <div style="{{ a.savingsValueStyle }}">{{ a.fmtSavingsM }}</div>
+                <div style="{{ a.kpiSubStyle }}">{{ a.fmtSavingsA }} / año</div>
+              </div>
+            </div>
+
+            <div style="{{ a.sectionCardStyle }}">
+              <div style="{{ a.sectionTitleStyle }}">Gasto mensual por categoría</div>
+              <div style="display:flex;flex-direction:column;gap:14px;margin-top:18px;">
+                <sc-for list="{{ a.caseData.categories }}" as="cat" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:110px 1fr 80px;align-items:center;gap:12px;">
+                    <div style="font-size:13px;color:{{ a.t.text }};font-weight:600;">{{ cat.name }}</div>
+                    <div style="{{ a.barTrackStyle }}">
+                      <div style="{{ cat.barStyle }}"></div>
+                    </div>
+                    <div style="{{ a.monoSubStyle }}">{{ cat.fmt }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="{{ a.sectionCardStyle }}">
+              <div style="{{ a.sectionTitleStyle }}">Evolución histórica</div>
+              <div style="display:flex;align-items:flex-end;gap:28px;height:120px;margin-top:24px;padding:0 8px;">
+                <sc-for list="{{ a.caseData.history }}" as="h" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;">
+                    <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
+                      <div style="{{ h.incomeBarStyle }}" title="Ingresos"></div>
+                      <div style="{{ h.expenseBarStyle }}" title="Gastos"></div>
+                    </div>
+                    <div style="font-size:12px;color:{{ a.t.muted }};font-weight:600;">{{ h.month }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="{{ a.legendRowStyle }}">
+                <div style="{{ a.legendItemStyle }}"><span style="{{ a.legendDotIncome }}"></span>Ingresos</div>
+                <div style="{{ a.legendItemStyle }}"><span style="{{ a.legendDotExpense }}"></span>Gastos</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- PRESUPUESTO -->
+          <sc-if value="{{ a.isPresupuesto }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ a.pageHeadStyle }}">
+              <div style="font-size:22px;font-weight:800;">Presupuesto · {{ a.caseData.label }}</div>
+              <div style="font-size:13px;color:{{ a.t.muted }};margin-top:4px;">Importes mensuales. El anual se calcula automáticamente (× 12).</div>
+            </div>
+
+            <sc-for list="{{ a.caseData.budget }}" as="grp" hint-placeholder-count="3">
+              <div style="{{ a.sectionCardStyle }}">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="{{ a.sectionTitleStyle }}">{{ grp.name }}</div>
+                  <sc-if value="{{ grp.isExpense }}" hint-placeholder-val="{{ false }}">
+                    <button style="{{ a.ghostDangerBtnStyle }}">Eliminar categoría</button>
+                  </sc-if>
+                </div>
+                <div style="display:flex;flex-direction:column;margin-top:14px;">
+                  <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="3">
+                    <div style="{{ a.budgetRowStyle }}">
+                      <div style="{{ a.budgetLabelInputStyle }}">{{ it.label }}</div>
+                      <div style="{{ a.budgetAmountInputStyle }}">{{ it.mFmt }}</div>
+                      <div style="{{ a.budgetAnnualStyle }}">{{ it.aFmt }}</div>
+                      <button style="{{ a.linkDangerStyle }}">Eliminar</button>
+                    </div>
+                  </sc-for>
+                  <div style="{{ a.budgetRowStyle }}">
+                    <div style="{{ a.budgetLabelInputPlaceholderStyle }}">{{ grp.addPlaceholder }}</div>
+                    <div style="{{ a.budgetAmountInputPlaceholderStyle }}">0,00</div>
+                    <div></div>
+                    <button style="{{ a.smallPrimaryBtnStyle }}">Añadir</button>
+                  </div>
+                </div>
+                <div style="{{ a.groupTotalStyle }}">Total: {{ grp.totalMFmt }} / mes · {{ grp.totalAFmt }} / año</div>
+              </div>
+            </sc-for>
+          </sc-if>
+
+          <!-- HISTORICO -->
+          <sc-if value="{{ a.isHistorico }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ a.pageHeadStyle }}">
+              <div style="font-size:22px;font-weight:800;">Histórico · {{ a.caseData.label }}</div>
+              <div style="font-size:13px;color:{{ a.t.muted }};margin-top:4px;">Registra los importes reales de cada mes para comparar con el presupuesto.</div>
+            </div>
+
+            <div style="{{ a.sectionCardStyle }}">
+              <div style="display:flex;gap:12px;align-items:center;">
+                <div style="{{ a.budgetAmountInputStyle }};flex:1;text-align:left;">2026-07</div>
+                <button style="{{ a.disabledPrimaryBtnStyle }}">Ese mes ya existe</button>
+              </div>
+            </div>
+
+            <sc-for list="{{ a.caseData.history }}" as="h" hint-placeholder-count="1">
+              <div style="{{ a.sectionCardStyle }}">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">
+                    <div style="font-size:17px;font-weight:800;">{{ h.month }}</div>
+                    <div style="{{ a.monoPosStyle }}">{{ h.incomeFmt }}</div>
+                    <div style="{{ a.monoNegStyle }}">{{ h.expenseFmt }}</div>
+                    <div style="{{ a.monoBoldStyle }}">= {{ h.savingsFmt }}</div>
+                  </div>
+                  <button style="{{ a.ghostDangerBtnStyle }}">Eliminar mes</button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:18px;">
+                  <div>
+                    <div style="{{ a.miniHeadStyle }}">Ingresos reales</div>
+                    <sc-for list="{{ a.caseData.budget }}" as="grp2" hint-placeholder-count="1">
+                      <sc-if value="{{ grp2.isIncome }}" hint-placeholder-val="{{ false }}">
+                        <sc-for list="{{ grp2.items }}" as="it2" hint-placeholder-count="1">
+                          <div style="{{ a.histRowStyle }}">
+                            <div style="{{ a.histLabelStyle }}">{{ it2.label }}</div>
+                            <div style="{{ a.budgetAmountInputStyle }}">{{ it2.mFmt }}</div>
+                          </div>
+                        </sc-for>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                  <div>
+                    <div style="{{ a.miniHeadStyle }}">Gastos reales</div>
+                    <sc-for list="{{ a.caseData.budget }}" as="grp3" hint-placeholder-count="2">
+                      <sc-if value="{{ grp3.isExpense }}" hint-placeholder-val="{{ false }}">
+                        <sc-for list="{{ grp3.items }}" as="it3" hint-placeholder-count="3">
+                          <div style="{{ a.histRowStyle }}">
+                            <div style="{{ a.histLabelStyle }}">{{ grp3.name }} · {{ it3.label }}</div>
+                            <div style="{{ a.budgetAmountInputStyle }}">{{ it3.mFmt }}</div>
+                          </div>
+                        </sc-for>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </sc-if>
+
+          <!-- CASOS -->
+          <sc-if value="{{ a.isCasos }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ a.pageHeadStyle }}">
+              <div style="font-size:22px;font-weight:800;">Casos</div>
+              <div style="font-size:13px;color:{{ a.t.muted }};margin-top:4px;">Cada caso es un presupuesto independiente. Duplica uno para comparar escenarios sin perder el original.</div>
+            </div>
+            <sc-for list="{{ a.caseOptions }}" as="c2" hint-placeholder-count="2">
+              <div style="{{ c2.cardStyle }}">
+                <div style="{{ a.budgetLabelInputStyle }};max-width:220px;">{{ c2.label }}</div>
+                <div style="{{ a.monoSubStyle }};flex:1;">Ahorro: {{ c2.savingsFmt }} / mes</div>
+                <sc-if value="{{ c2.isActive }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ a.activeTagStyle }}">Activo</div>
+                </sc-if>
+                <sc-if value="{{ c2.isActive }}" hint-placeholder-val="{{ false }}">
+                  <div></div>
+                </sc-if>
+                <button style="{{ a.secondaryBtnStyle }}">Duplicar</button>
+                <button style="{{ a.linkDangerStyle }}">Eliminar</button>
+              </div>
+            </sc-for>
+            <div style="{{ a.sectionCardStyle }}">
+              <div style="display:flex;gap:10px;">
+                <div style="{{ a.budgetLabelInputPlaceholderStyle }};flex:1;">Nombre del nuevo caso (ej. Sin hipoteca)</div>
+                <button style="{{ a.primaryBtnStyle }}">Crear caso vacío</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- DATOS -->
+          <sc-if value="{{ a.isDatos }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ a.pageHeadStyle }}">
+              <div style="font-size:22px;font-weight:800;">Datos</div>
+              <div style="font-size:13px;color:{{ a.t.muted }};margin-top:4px;">Todo se guarda automáticamente en este navegador. Exporta a CSV para hacer copia de seguridad, moverlo a otro dispositivo o editarlo en Excel/Sheets.</div>
+            </div>
+            <div style="{{ a.sectionCardStyle }}">
+              <div style="{{ a.sectionTitleStyle }}">Exportar</div>
+              <div style="font-size:13px;color:{{ a.t.muted }};margin-top:6px;">Descarga un único CSV con todos tus casos, presupuestos e histórico.</div>
+              <button style="{{ a.primaryBtnStyle }};margin-top:14px;">Descargar CSV</button>
+            </div>
+            <div style="{{ a.sectionCardStyle }}">
+              <div style="{{ a.sectionTitleStyle }}">Importar</div>
+              <div style="font-size:13px;color:{{ a.t.muted }};margin-top:6px;">Carga un CSV exportado previamente para restaurar tus datos. Sustituye todo lo que haya en este navegador ahora mismo.</div>
+              <button style="{{ a.secondaryBtnStyle }};margin-top:14px;">Elegir archivo CSV</button>
+            </div>
+            <div style="{{ a.sectionCardStyle }}">
+              <div style="{{ a.sectionTitleStyle }}">Restablecer</div>
+              <div style="display:flex;gap:12px;margin-top:14px;">
+                <button style="{{ a.secondaryBtnStyle }}">Cargar datos de ejemplo</button>
+                <button style="{{ a.destructiveBtnStyle }}">Borrar todos los datos</button>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- OPTION 1B — TOPNAV / DENSE TABLE LAYOUT                        -->
+  <!-- ============================================================= -->
+  <section id="1b" style="{{ optionWrapStyle }}">
+    <div style="{{ badgeRowStyle }}">
+      <div style="{{ badgeStyle }}">1b</div>
+      <div style="font-size:15px;font-weight:700;color:#18181b;">Topnav + tablas densas</div>
+    </div>
+
+    <div style="{{ b.frameStyle }}">
+      <div style="{{ b.topbarStyle }}">
+        <div style="display:flex;align-items:center;gap:20px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="{{ b.logoBoxStyle }}">€</div>
+            <div style="font-size:15px;font-weight:800;">Expensor</div>
+          </div>
+          <select style="{{ b.selectStyle }}" value="{{ b.activeCase }}" onChange="{{ b.onCaseChange }}">
+            <sc-for list="{{ b.caseOptions }}" as="c" hint-placeholder-count="2">
+              <option value="{{ c.id }}">{{ c.label }}</option>
+            </sc-for>
+          </select>
+        </div>
+        <div style="{{ b.navPillRowStyle }}">
+          <sc-for list="{{ b.navItems }}" as="item" hint-placeholder-count="5">
+            <div style="{{ item.style }}" onClick="{{ item.onClick }}">{{ item.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="{{ b.themeSwitchStyle }}" onClick="{{ b.toggleTheme }}">
+            <div style="{{ b.themeKnobStyle }}"></div>
+          </div>
+          <div style="{{ b.userChipStyle }}">JG</div>
+        </div>
+      </div>
+
+      <div style="{{ b.contentStyle }}">
+
+        <!-- RESUMEN -->
+        <sc-if value="{{ b.isResumen }}" hint-placeholder-val="{{ true }}">
+          <div style="{{ b.kpiRowStyle }}">
+            <div style="{{ b.cardStyle }}">
+              <div style="{{ b.kpiLabelStyle }}">Ingresos / mes</div>
+              <div style="{{ b.kpiValuePosStyle }}">{{ b.fmtIncomeM }}</div>
+              <div style="{{ b.kpiSubStyle }}">{{ b.fmtIncomeA }} / año</div>
+            </div>
+            <div style="{{ b.cardStyle }}">
+              <div style="{{ b.kpiLabelStyle }}">Gastos / mes</div>
+              <div style="{{ b.kpiValueNegStyle }}">{{ b.fmtExpenseM }}</div>
+              <div style="{{ b.kpiSubStyle }}">{{ b.fmtExpenseA }} / año</div>
+            </div>
+            <div style="{{ b.cardStyle }}">
+              <div style="{{ b.kpiLabelStyle }}">Ahorro / mes</div>
+              <div style="{{ b.savingsValueStyle }}">{{ b.fmtSavingsM }}</div>
+              <div style="{{ b.kpiSubStyle }}">{{ b.fmtSavingsA }} / año</div>
+            </div>
+            <div style="{{ b.cardStyle }}">
+              <div style="{{ b.kpiLabelStyle }}">Tasa de ahorro</div>
+              <div style="{{ b.rateValueStyle }}">{{ b.fmtSavingsRate }}</div>
+              <div style="{{ b.kpiSubStyle }}">sobre ingresos</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:16px;">
+            <div style="{{ b.sectionCardStyle }}">
+              <div style="{{ b.sectionTitleStyle }}">Gasto por categoría</div>
+              <table style="{{ b.tableStyle }}">
+                <thead>
+                  <tr>
+                    <th style="{{ b.thStyle }}">Categoría</th>
+                    <th style="{{ b.thRightStyle }}">Mensual</th>
+                    <th style="{{ b.thRightStyle }}">% del gasto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ b.caseData.categories }}" as="cat" hint-placeholder-count="6">
+                    <tr style="{{ b.trStyle }}">
+                      <td style="{{ b.tdStyle }}"><span style="{{ cat.dotStyle }}"></span>{{ cat.name }}</td>
+                      <td style="{{ b.tdRightMonoStyle }}">{{ cat.fmt }}</td>
+                      <td style="{{ b.tdRightStyle }}">
+                        <div style="{{ b.barTrackStyle }}"><div style="{{ cat.barStyle }}"></div></div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="{{ b.sectionCardStyle }}">
+              <div style="{{ b.sectionTitleStyle }}">Evolución</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+                <sc-for list="{{ b.caseData.history }}" as="h" hint-placeholder-count="1">
+                  <div>
+                    <div style="{{ b.miniHeadStyle }}">{{ h.month }}</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="{{ b.evoLabelStyle }}">Ingr.</div>
+                        <div style="{{ b.barTrackStyle }}"><div style="{{ h.incomeBarStyle2 }}"></div></div>
+                        <div style="{{ b.evoValStyle }}">{{ h.incomeFmt }}</div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="{{ b.evoLabelStyle }}">Gast.</div>
+                        <div style="{{ b.barTrackStyle }}"><div style="{{ h.expenseBarStyle2 }}"></div></div>
+                        <div style="{{ b.evoValStyle }}">{{ h.expenseFmt }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- PRESUPUESTO -->
+        <sc-if value="{{ b.isPresupuesto }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ b.caseData.budget }}" as="grp" hint-placeholder-count="3">
+            <div style="{{ b.sectionCardStyle }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="{{ b.sectionTitleStyle }}">{{ grp.name }}</div>
+                <div style="{{ b.groupTotalPillStyle }}">{{ grp.totalMFmt }} / mes</div>
+              </div>
+              <table style="{{ b.tableStyle }};margin-top:10px;">
+                <thead>
+                  <tr>
+                    <th style="{{ b.thStyle }}">Concepto</th>
+                    <th style="{{ b.thRightStyle }}">Mensual</th>
+                    <th style="{{ b.thRightStyle }}">Anual</th>
+                    <th style="{{ b.thRightStyle }}"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="3">
+                    <tr style="{{ b.trStyle }}">
+                      <td style="{{ b.tdStyle }}">{{ it.label }}</td>
+                      <td style="{{ b.tdRightMonoStyle }}">{{ it.mFmt }}</td>
+                      <td style="{{ b.tdRightMonoMutedStyle }}">{{ it.aFmt }}</td>
+                      <td style="{{ b.tdRightStyle }}"><button style="{{ b.linkDangerStyle }}">Eliminar</button></td>
+                    </tr>
+                  </sc-for>
+                  <tr>
+                    <td style="{{ b.tdStyle }}"><div style="{{ b.budgetLabelInputPlaceholderStyle }}">{{ grp.addPlaceholder }}</div></td>
+                    <td style="{{ b.tdRightStyle }}" colspan="2"><div style="{{ b.budgetAmountInputPlaceholderStyle }}">0,00</div></td>
+                    <td style="{{ b.tdRightStyle }}"><button style="{{ b.smallPrimaryBtnStyle }}">Añadir</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </sc-for>
+        </sc-if>
+
+        <!-- HISTORICO -->
+        <sc-if value="{{ b.isHistorico }}" hint-placeholder-val="{{ false }}">
+          <div style="{{ b.sectionCardStyle }}">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <div style="{{ b.budgetAmountInputStyle }};flex:1;text-align:left;">2026-07</div>
+              <button style="{{ b.disabledPrimaryBtnStyle }}">Ese mes ya existe</button>
+            </div>
+          </div>
+          <sc-for list="{{ b.caseData.history }}" as="h" hint-placeholder-count="1">
+            <div style="{{ b.sectionCardStyle }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <div style="display:flex;align-items:baseline;gap:12px;">
+                  <div style="font-size:16px;font-weight:800;">{{ h.month }}</div>
+                  <div style="{{ b.monoPosStyle }}">{{ h.incomeFmt }}</div>
+                  <div style="{{ b.monoNegStyle }}">{{ h.expenseFmt }}</div>
+                  <div style="{{ b.monoBoldStyle }}">= {{ h.savingsFmt }}</div>
+                </div>
+                <button style="{{ b.ghostDangerBtnStyle }}">Eliminar mes</button>
+              </div>
+              <table style="{{ b.tableStyle }};margin-top:14px;">
+                <thead><tr><th style="{{ b.thStyle }}">Concepto</th><th style="{{ b.thRightStyle }}">Real</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ b.caseData.budget }}" as="grp2" hint-placeholder-count="3">
+                    <sc-for list="{{ grp2.items }}" as="it2" hint-placeholder-count="3">
+                      <tr style="{{ b.trStyle }}">
+                        <td style="{{ b.tdStyle }}">{{ grp2.name }} · {{ it2.label }}</td>
+                        <td style="{{ b.tdRightMonoStyle }}">{{ it2.mFmt }}</td>
+                      </tr>
+                    </sc-for>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-for>
+        </sc-if>
+
+        <!-- CASOS -->
+        <sc-if value="{{ b.isCasos }}" hint-placeholder-val="{{ false }}">
+          <table style="{{ b.tableStyle }}">
+            <thead>
+              <tr><th style="{{ b.thStyle }}">Caso</th><th style="{{ b.thRightStyle }}">Ahorro / mes</th><th style="{{ b.thRightStyle }}"></th></tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ b.caseOptions }}" as="c2" hint-placeholder-count="2">
+                <tr style="{{ c2.trStyle }}">
+                  <td style="{{ b.tdStyle }}">
+                    {{ c2.label }}
+                    <sc-if value="{{ c2.isActive }}" hint-placeholder-val="{{ false }}">
+                      <span style="{{ b.activeTagStyle }}">Activo</span>
+                    </sc-if>
+                  </td>
+                  <td style="{{ c2.savingsTdStyle }}">{{ c2.savingsFmt }}</td>
+                  <td style="{{ b.tdRightStyle }}">
+                    <button style="{{ b.secondaryBtnStyle }}">Duplicar</button>
+                    <button style="{{ b.linkDangerStyle }}">Eliminar</button>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <div style="{{ b.sectionCardStyle }}">
+            <div style="display:flex;gap:10px;">
+              <div style="{{ b.budgetLabelInputPlaceholderStyle }};flex:1;">Nombre del nuevo caso (ej. Sin hipoteca)</div>
+              <button style="{{ b.primaryBtnStyle }}">Crear caso vacío</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- DATOS -->
+        <sc-if value="{{ b.isDatos }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <div style="{{ b.sectionCardStyle }}">
+              <div style="{{ b.sectionTitleStyle }}">Exportar</div>
+              <div style="font-size:12.5px;color:{{ b.t.muted }};margin-top:6px;line-height:1.5;">CSV con todos tus casos, presupuestos e histórico.</div>
+              <button style="{{ b.primaryBtnStyle }};margin-top:14px;">Descargar CSV</button>
+            </div>
+            <div style="{{ b.sectionCardStyle }}">
+              <div style="{{ b.sectionTitleStyle }}">Importar</div>
+              <div style="font-size:12.5px;color:{{ b.t.muted }};margin-top:6px;line-height:1.5;">Sustituye los datos de este navegador.</div>
+              <button style="{{ b.secondaryBtnStyle }};margin-top:14px;">Elegir archivo CSV</button>
+            </div>
+            <div style="{{ b.sectionCardStyle }}">
+              <div style="{{ b.sectionTitleStyle }}">Restablecer</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+                <button style="{{ b.secondaryBtnStyle }}">Cargar ejemplo</button>
+                <button style="{{ b.destructiveBtnStyle }}">Borrar todos los datos</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ICONS = {
+  resumen: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="8"></rect><rect x="10" y="8" width="4" height="12"></rect><rect x="17" y="4" width="4" height="16"></rect></svg>',
+  presupuesto: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path><path d="M8 14h3"></path></svg>',
+  historico: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 15l4-6 4 3 5-7"></path></svg>',
+  casos: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="8" rx="1.5"></rect><rect x="3" y="13" width="8" height="8" rx="1.5"></rect><rect x="13" y="13" width="8" height="8" rx="1.5"></rect></svg>',
+  datos: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a9 9 0 0 0 -9 9v9h18v-9a9 9 0 0 0 -9 -9z"></path><path d="M12 12v6"></path><path d="M12 12l4 -2"></path></svg>'
+};
+
+const SCREENS = [
+  { id: 'resumen', label: 'Resumen' },
+  { id: 'presupuesto', label: 'Presupuesto' },
+  { id: 'historico', label: 'Histórico' },
+  { id: 'casos', label: 'Casos' },
+  { id: 'datos', label: 'Datos' }
+];
+
+const CAT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#22c55e', '#a78bfa', '#fb7185'];
+
+function fmtEUR(n) {
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(n);
+  return sign + abs.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+function fmtNum(n) {
+  return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function buildCasesData() {
+  const ahora = {
+    id: 'ahora', label: 'Ahora',
+    incomeM: 1292.34, incomeA: 15508.08,
+    expenseM: 2191.66, expenseA: 26299.92,
+    savingsM: -899.32, savingsA: -10791.84,
+    categories: [
+      { name: 'Galicia', value: 930 }, { name: 'Casa', value: 570 }, { name: 'Día a día', value: 350 },
+      { name: 'Otros', value: 300 }, { name: 'Vehículos', value: 79 }, { name: 'Suscripciones', value: 20 }
+    ],
+    budget: [
+      { name: 'Ingresos', kind: 'income', addPlaceholder: 'Nuevo concepto de ingreso', items: [
+        { label: 'Nómina', m: 1292.34, a: 15508.08 }
+      ]},
+      { name: 'Vehículos', kind: 'expense', addPlaceholder: 'Nuevo concepto de gasto', items: [
+        { label: 'Permiso circulación coche', m: 4.2, a: 50.40 },
+        { label: 'Seguro coche', m: 24.48, a: 293.76 },
+        { label: 'Gasolina', m: 50, a: 600 }
+      ]},
+      { name: 'Día a día', kind: 'expense', addPlaceholder: 'Nuevo concepto de gasto', items: [
+        { label: 'Comida', m: 200, a: 2400 },
+        { label: 'Restaurante', m: 100, a: 1200 },
+        { label: 'Bar / Merienda', m: 50, a: 600 }
+      ]}
+    ],
+    history: [
+      { month: 'Julio 2026', income: 1292.34, expense: 2191.66, savings: -899.32 }
+    ]
+  };
+
+  const hipoteca = {
+    id: 'hipoteca', label: 'Con hipoteca',
+    incomeM: 2500, incomeA: 30000,
+    expenseM: 1183.32, expenseA: 14199.84,
+    savingsM: 1316.68, savingsA: 15800.16,
+    categories: [
+      { name: 'Hipoteca', value: 650 }, { name: 'Casa', value: 260 }, { name: 'Día a día', value: 180 },
+      { name: 'Otros', value: 60 }, { name: 'Vehículos', value: 25 }, { name: 'Suscripciones', value: 8 }
+    ],
+    budget: [
+      { name: 'Ingresos', kind: 'income', addPlaceholder: 'Nuevo concepto de ingreso', items: [
+        { label: 'Nómina 1', m: 1500, a: 18000 },
+        { label: 'Nómina 2', m: 1000, a: 12000 }
+      ]},
+      { name: 'Hogar', kind: 'expense', addPlaceholder: 'Nuevo concepto de gasto', items: [
+        { label: 'Hipoteca', m: 650, a: 7800 },
+        { label: 'Comunidad', m: 45, a: 540 }
+      ]},
+      { name: 'Día a día', kind: 'expense', addPlaceholder: 'Nuevo concepto de gasto', items: [
+        { label: 'Comida', m: 140, a: 1680 },
+        { label: 'Restaurante', m: 40, a: 480 }
+      ]}
+    ],
+    history: [
+      { month: 'Julio 2026', income: 2500, expense: 1183.32, savings: 1316.68 }
+    ]
+  };
+
+  return { ahora, hipoteca };
+}
+
+class Component extends DCLogic {
+  state = {
+    a_screen: 'resumen', a_dark: true, a_case: 'ahora',
+    b_screen: 'resumen', b_dark: true, b_case: 'ahora'
+  };
+
+  theme(dark) {
+    return dark ? {
+      bg: '#09090b', card: '#18181b', cardAlt: '#141417', border: '#27272a', text: '#fafafa',
+      muted: '#a1a1aa', primaryBg: '#fafafa', primaryText: '#18181b',
+      secondaryBg: '#27272a', secondaryText: '#fafafa', secondaryBorder: '#3f3f46',
+      inputBg: '#27272a', inputBorder: '#3f3f46', trackBg: '#27272a',
+      destructiveBg: '#7f1d1d', destructiveText: '#fecaca', dangerText: '#f87171',
+      positive: '#34d399', negative: '#f87171', sidebarBg: '#0e0e11', tagBg: '#052e1f', tagText: '#34d399'
+    } : {
+      bg: '#f4f4f5', card: '#ffffff', cardAlt: '#fafafa', border: '#e4e4e7', text: '#18181b',
+      muted: '#71717a', primaryBg: '#18181b', primaryText: '#fafafa',
+      secondaryBg: '#f4f4f5', secondaryText: '#18181b', secondaryBorder: '#d4d4d8',
+      inputBg: '#f4f4f5', inputBorder: '#d4d4d8', trackBg: '#e4e4e7',
+      destructiveBg: '#fee2e2', destructiveText: '#b91c1c', dangerText: '#dc2626',
+      positive: '#059669', negative: '#dc2626', sidebarBg: '#fafafa', tagBg: '#dcfce7', tagText: '#15803d'
+    };
+  }
+
+  buildNavA(t, screen, setScreen) {
+    return SCREENS.map(s => {
+      const active = s.id === screen;
+      return {
+        label: s.label,
+        onClick: () => setScreen(s.id),
+        iconHtml: { __html: ICONS[s.id] },
+        iconStyle: { display: 'flex', color: active ? t.primaryText : t.muted },
+        style: {
+          display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8,
+          fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
+          background: active ? t.primaryBg : 'transparent',
+          color: active ? t.primaryText : t.text
+        }
+      };
+    });
+  }
+
+  buildNavB(t, screen, setScreen) {
+    return SCREENS.map(s => {
+      const active = s.id === screen;
+      return {
+        label: s.label,
+        onClick: () => setScreen(s.id),
+        style: {
+          padding: '7px 14px', borderRadius: 999, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+          background: active ? t.primaryBg : 'transparent',
+          color: active ? t.primaryText : t.muted
+        }
+      };
+    });
+  }
+
+  buildCaseOptionsA(t, allCases, activeId) {
+    return Object.values(allCases).map(c => ({
+      id: c.id, label: c.label, isActive: c.id === activeId,
+      savingsFmt: fmtEUR(c.savingsM),
+      cardStyle: {
+        display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 10,
+        border: c.id === activeId ? ('1px solid ' + t.text) : ('1px solid ' + t.border),
+        background: t.card, marginBottom: 10
+      }
+    }));
+  }
+
+  buildCaseOptionsB(t, allCases, activeId) {
+    return Object.values(allCases).map(c => ({
+      id: c.id, label: c.label, isActive: c.id === activeId,
+      savingsFmt: fmtEUR(c.savingsM),
+      trStyle: { borderBottom: '1px solid ' + t.border },
+      savingsTdStyle: { padding: '10px 12px', textAlign: 'right', fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: c.savingsM >= 0 ? t.positive : t.negative }
+    }));
+  }
+
+  renderVals() {
+    const st = this.state;
+    const allCases = buildCasesData();
+
+    // ---------- shared page intro ----------
+    const canvasStyle = { minHeight: '100vh', padding: '48px 32px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 56 };
+    const introStyle = { maxWidth: 1400, width: '100%' };
+    const optionWrapStyle = { width: '100%', maxWidth: 1400, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 14, scrollMarginTop: 24 };
+    const badgeRowStyle = { display: 'flex', alignItems: 'center', gap: 10 };
+    const badgeStyle = { width: 30, height: 30, borderRadius: 8, background: '#18181b', color: '#fff', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' };
+
+    // ============================================================
+    // VARIANT A — sidebar
+    // ============================================================
+    const tA = this.theme(st.a_dark);
+    const caseDataA = allCases[st.a_case];
+    const monoBase = { fontFamily: "'IBM Plex Mono', monospace" };
+
+    const a = {
+      t: tA,
+      activeCase: st.a_case,
+      caseData: caseDataA,
+      isResumen: st.a_screen === 'resumen',
+      isPresupuesto: st.a_screen === 'presupuesto',
+      isHistorico: st.a_screen === 'historico',
+      isCasos: st.a_screen === 'casos',
+      isDatos: st.a_screen === 'datos',
+
+      frameStyle: {
+        display: 'flex', width: '100%', height: 860, borderRadius: 16, overflow: 'hidden',
+        border: '1px solid ' + tA.border, boxShadow: '0 20px 50px -20px rgba(0,0,0,0.35)',
+        background: tA.bg, color: tA.text, fontSize: 14
+      },
+      sidebarStyle: { width: 232, flexShrink: 0, background: tA.sidebarBg, borderRight: '1px solid ' + tA.border, display: 'flex', flexDirection: 'column', padding: '20px 0' },
+      logoBoxStyle: { width: 30, height: 30, borderRadius: 8, background: tA.primaryBg, color: tA.primaryText, fontSize: 15, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      themeToggleRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+      themeSwitchStyle: { width: 38, height: 22, borderRadius: 999, background: st.a_dark ? '#3f3f46' : '#d4d4d8', position: 'relative', cursor: 'pointer', padding: 2 },
+      themeKnobStyle: { width: 18, height: 18, borderRadius: 999, background: '#fafafa', transform: st.a_dark ? 'translateX(16px)' : 'translateX(0px)', transition: 'transform .15s' },
+      toggleTheme: () => this.setState({ a_dark: !st.a_dark }),
+
+      mainStyle: { flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 },
+      topbarStyle: { height: 56, flexShrink: 0, borderBottom: '1px solid ' + tA.border, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' },
+      selectStyle: { background: tA.inputBg, border: '1px solid ' + tA.inputBorder, color: tA.text, borderRadius: 8, padding: '7px 12px', fontSize: 13, fontWeight: 600 },
+      userChipStyle: { width: 30, height: 30, borderRadius: 999, background: tA.secondaryBg, color: tA.text, fontSize: 11.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      contentStyle: { flex: 1, overflowY: 'auto', padding: '24px 28px 40px', display: 'flex', flexDirection: 'column', gap: 16 },
+
+      pageHeadStyle: { marginBottom: 4 },
+      kpiRowStyle: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 },
+      cardStyle: { background: tA.card, border: '1px solid ' + tA.border, borderRadius: 12, padding: '18px 20px' },
+      sectionCardStyle: { background: tA.card, border: '1px solid ' + tA.border, borderRadius: 12, padding: '20px 22px' },
+      sectionTitleStyle: { fontSize: 14.5, fontWeight: 700 },
+      kpiLabelStyle: { fontSize: 12.5, color: tA.muted, fontWeight: 600 },
+      kpiValuePosStyle: { ...monoBase, fontSize: 26, fontWeight: 700, color: tA.positive, marginTop: 8 },
+      kpiValueNegStyle: { ...monoBase, fontSize: 26, fontWeight: 700, color: tA.negative, marginTop: 8 },
+      savingsValueStyle: { ...monoBase, fontSize: 26, fontWeight: 700, color: caseDataA.savingsM >= 0 ? tA.positive : tA.negative, marginTop: 8 },
+      kpiSubStyle: { ...monoBase, fontSize: 12, color: tA.muted, marginTop: 4 },
+
+      fmtIncomeM: fmtEUR(caseDataA.incomeM), fmtIncomeA: fmtEUR(caseDataA.incomeA),
+      fmtExpenseM: fmtEUR(caseDataA.expenseM), fmtExpenseA: fmtEUR(caseDataA.expenseA),
+      fmtSavingsM: fmtEUR(caseDataA.savingsM), fmtSavingsA: fmtEUR(caseDataA.savingsA),
+
+      barTrackStyle: { height: 10, borderRadius: 999, background: tA.trackBg, overflow: 'hidden' },
+      monoSubStyle: { ...monoBase, fontSize: 12.5, color: tA.muted, textAlign: 'right' },
+
+      legendRowStyle: { display: 'flex', gap: 20, marginTop: 14, borderTop: '1px solid ' + tA.border, paddingTop: 14 },
+      legendItemStyle: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: tA.muted, fontWeight: 600 },
+      legendDotIncome: { width: 9, height: 9, borderRadius: 999, background: tA.positive, display: 'inline-block' },
+      legendDotExpense: { width: 9, height: 9, borderRadius: 999, background: tA.negative, display: 'inline-block' },
+
+      ghostDangerBtnStyle: { background: 'transparent', border: 'none', color: tA.dangerText, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: '4px 6px' },
+      linkDangerStyle: { background: 'transparent', border: 'none', color: tA.dangerText, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' },
+      primaryBtnStyle: { background: tA.primaryBg, color: tA.primaryText, border: 'none', borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer' },
+      secondaryBtnStyle: { background: tA.secondaryBg, color: tA.secondaryText, border: '1px solid ' + tA.secondaryBorder, borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer' },
+      smallPrimaryBtnStyle: { background: tA.primaryBg, color: tA.primaryText, border: 'none', borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' },
+      destructiveBtnStyle: { background: tA.destructiveBg, color: tA.destructiveText, border: 'none', borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer' },
+      disabledPrimaryBtnStyle: { background: tA.secondaryBg, color: tA.muted, border: '1px solid ' + tA.secondaryBorder, borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 700, cursor: 'not-allowed', whiteSpace: 'nowrap' },
+      activeTagStyle: { background: tA.tagBg, color: tA.tagText, fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999 },
+
+      budgetRowStyle: { display: 'grid', gridTemplateColumns: '1fr 130px 100px 70px', gap: 10, alignItems: 'center', padding: '9px 0', borderBottom: '1px solid ' + tA.border },
+      budgetLabelInputStyle: { background: tA.inputBg, border: '1px solid ' + tA.inputBorder, borderRadius: 7, padding: '8px 12px', fontSize: 13, fontWeight: 600 },
+      budgetLabelInputPlaceholderStyle: { background: tA.inputBg, border: '1px solid ' + tA.inputBorder, borderRadius: 7, padding: '8px 12px', fontSize: 13, color: tA.muted },
+      budgetAmountInputStyle: { ...monoBase, background: tA.inputBg, border: '1px solid ' + tA.inputBorder, borderRadius: 7, padding: '8px 12px', fontSize: 13, fontWeight: 600, textAlign: 'right' },
+      budgetAmountInputPlaceholderStyle: { ...monoBase, background: tA.inputBg, border: '1px solid ' + tA.inputBorder, borderRadius: 7, padding: '8px 12px', fontSize: 13, color: tA.muted, textAlign: 'right' },
+      budgetAnnualStyle: { ...monoBase, fontSize: 12.5, color: tA.muted, textAlign: 'right' },
+      groupTotalStyle: { ...monoBase, fontSize: 12.5, color: tA.muted, textAlign: 'right', marginTop: 12 },
+
+      miniHeadStyle: { fontSize: 12.5, fontWeight: 700, color: tA.muted, textTransform: 'uppercase', letterSpacing: '0.03em' },
+      histRowStyle: { display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10, alignItems: 'center', padding: '7px 0', borderBottom: '1px solid ' + tA.border },
+      histLabelStyle: { fontSize: 12.5, color: tA.text },
+      monoPosStyle: { ...monoBase, fontSize: 14, fontWeight: 700, color: tA.positive },
+      monoNegStyle: { ...monoBase, fontSize: 14, fontWeight: 700, color: tA.negative },
+      monoBoldStyle: { ...monoBase, fontSize: 14, fontWeight: 800, color: tA.text }
+    };
+
+    a.navItems = this.buildNavA(tA, st.a_screen, (id) => this.setState({ a_screen: id }));
+    a.onCaseChange = (e) => this.setState({ a_case: e.target.value });
+    a.caseOptions = this.buildCaseOptionsA(tA, allCases, st.a_case);
+
+    const maxCatA = Math.max(...caseDataA.categories.map(c => c.value));
+    a.caseData = {
+      ...caseDataA,
+      categories: caseDataA.categories.map((c, i) => ({
+        ...c, fmt: fmtEUR(c.value),
+        barStyle: { width: (c.value / maxCatA * 100) + '%', height: '100%', borderRadius: 999, background: CAT_COLORS[i % CAT_COLORS.length] }
+      })),
+      budget: caseDataA.budget.map(g => {
+        const totalM = g.items.reduce((s, it) => s + it.m, 0);
+        const totalA = g.items.reduce((s, it) => s + it.a, 0);
+        return {
+          ...g, isExpense: g.kind === 'expense', isIncome: g.kind === 'income',
+          totalMFmt: fmtEUR(totalM), totalAFmt: fmtEUR(totalA),
+          items: g.items.map(it => ({ ...it, mFmt: fmtNum(it.m), aFmt: fmtEUR(it.a) }))
+        };
+      }),
+      history: caseDataA.history.map(h => ({
+        ...h,
+        incomeFmt: '+' + fmtEUR(h.income), expenseFmt: '-' + fmtEUR(h.expense), savingsFmt: fmtEUR(h.savings),
+        incomeBarStyle: { width: 34, height: Math.max(10, h.income / 2500 * 80), borderRadius: '4px 4px 0 0', background: tA.positive },
+        expenseBarStyle: { width: 34, height: Math.max(10, h.expense / 2500 * 80), borderRadius: '4px 4px 0 0', background: tA.negative }
+      }))
+    };
+
+    // ============================================================
+    // VARIANT B — topnav / dense tables
+    // ============================================================
+    const tB = this.theme(st.b_dark);
+    const caseDataB = allCases[st.b_case];
+    const savingsRate = caseDataB.incomeM !== 0 ? (caseDataB.savingsM / caseDataB.incomeM * 100) : 0;
+
+    const b = {
+      t: tB,
+      activeCase: st.b_case,
+      isResumen: st.b_screen === 'resumen',
+      isPresupuesto: st.b_screen === 'presupuesto',
+      isHistorico: st.b_screen === 'historico',
+      isCasos: st.b_screen === 'casos',
+      isDatos: st.b_screen === 'datos',
+
+      frameStyle: { width: '100%', minHeight: 860, borderRadius: 16, overflow: 'hidden', border: '1px solid ' + tB.border, boxShadow: '0 20px 50px -20px rgba(0,0,0,0.35)', background: tB.bg, color: tB.text, fontSize: 13.5 },
+      logoBoxStyle: { width: 26, height: 26, borderRadius: 7, background: tB.primaryBg, color: tB.primaryText, fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      topbarStyle: { height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', borderBottom: '1px solid ' + tB.border, background: tB.cardAlt },
+      selectStyle: { background: tB.inputBg, border: '1px solid ' + tB.inputBorder, color: tB.text, borderRadius: 7, padding: '6px 10px', fontSize: 12.5, fontWeight: 600 },
+      navPillRowStyle: { display: 'flex', gap: 4, background: tB.trackBg, padding: 4, borderRadius: 999 },
+      userChipStyle: { width: 26, height: 26, borderRadius: 999, background: tB.secondaryBg, color: tB.text, fontSize: 10.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      themeSwitchStyle: { width: 34, height: 20, borderRadius: 999, background: st.b_dark ? '#3f3f46' : '#d4d4d8', position: 'relative', cursor: 'pointer', padding: 2 },
+      themeKnobStyle: { width: 16, height: 16, borderRadius: 999, background: '#fafafa', transform: st.b_dark ? 'translateX(14px)' : 'translateX(0px)', transition: 'transform .15s' },
+      toggleTheme: () => this.setState({ b_dark: !st.b_dark }),
+
+      contentStyle: { padding: '22px 24px 36px', display: 'flex', flexDirection: 'column', gap: 16 },
+      kpiRowStyle: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 },
+      cardStyle: { background: tB.card, border: '1px solid ' + tB.border, borderRadius: 10, padding: '14px 16px' },
+      sectionCardStyle: { background: tB.card, border: '1px solid ' + tB.border, borderRadius: 10, padding: '16px 18px' },
+      sectionTitleStyle: { fontSize: 13.5, fontWeight: 700 },
+      kpiLabelStyle: { fontSize: 11.5, color: tB.muted, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' },
+      kpiValuePosStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 21, fontWeight: 700, color: tB.positive, marginTop: 6 },
+      kpiValueNegStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 21, fontWeight: 700, color: tB.negative, marginTop: 6 },
+      savingsValueStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 21, fontWeight: 700, color: caseDataB.savingsM >= 0 ? tB.positive : tB.negative, marginTop: 6 },
+      rateValueStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 21, fontWeight: 700, color: savingsRate >= 0 ? tB.positive : tB.negative, marginTop: 6 },
+      kpiSubStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, color: tB.muted, marginTop: 3 },
+
+      fmtIncomeM: fmtEUR(caseDataB.incomeM), fmtIncomeA: fmtEUR(caseDataB.incomeA),
+      fmtExpenseM: fmtEUR(caseDataB.expenseM), fmtExpenseA: fmtEUR(caseDataB.expenseA),
+      fmtSavingsM: fmtEUR(caseDataB.savingsM), fmtSavingsA: fmtEUR(caseDataB.savingsA),
+      fmtSavingsRate: savingsRate.toFixed(1) + ' %',
+
+      tableStyle: { width: '100%', borderCollapse: 'collapse' },
+      thStyle: { textAlign: 'left', fontSize: 11, color: tB.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', padding: '6px 8px', borderBottom: '1px solid ' + tB.border },
+      thRightStyle: { textAlign: 'right', fontSize: 11, color: tB.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', padding: '6px 8px', borderBottom: '1px solid ' + tB.border },
+      trStyle: { borderBottom: '1px solid ' + tB.border },
+      tdStyle: { padding: '9px 8px', fontSize: 13, fontWeight: 600 },
+      tdRightStyle: { padding: '9px 8px', textAlign: 'right' },
+      tdRightMonoStyle: { fontFamily: "'IBM Plex Mono',monospace", padding: '9px 8px', textAlign: 'right', fontSize: 12.5, fontWeight: 700 },
+      tdRightMonoMutedStyle: { fontFamily: "'IBM Plex Mono',monospace", padding: '9px 8px', textAlign: 'right', fontSize: 12, color: tB.muted },
+      barTrackStyle: { height: 8, borderRadius: 999, background: tB.trackBg, overflow: 'hidden', width: 100, marginLeft: 'auto' },
+
+      miniHeadStyle: { fontSize: 12, fontWeight: 700, color: tB.muted },
+      evoLabelStyle: { width: 34, fontSize: 11, color: tB.muted, fontWeight: 600 },
+      evoValStyle: { fontFamily: "'IBM Plex Mono',monospace", width: 78, fontSize: 12, fontWeight: 700, textAlign: 'right' },
+
+      groupTotalPillStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, fontWeight: 700, color: tB.muted, background: tB.trackBg, padding: '4px 10px', borderRadius: 999 },
+      ghostDangerBtnStyle: { background: 'transparent', border: 'none', color: tB.dangerText, fontSize: 12, fontWeight: 700, cursor: 'pointer' },
+      linkDangerStyle: { background: 'transparent', border: 'none', color: tB.dangerText, fontSize: 12, fontWeight: 700, cursor: 'pointer', marginLeft: 10 },
+      primaryBtnStyle: { background: tB.primaryBg, color: tB.primaryText, border: 'none', borderRadius: 7, padding: '8px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' },
+      secondaryBtnStyle: { background: tB.secondaryBg, color: tB.secondaryText, border: '1px solid ' + tB.secondaryBorder, borderRadius: 7, padding: '8px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' },
+      smallPrimaryBtnStyle: { background: tB.primaryBg, color: tB.primaryText, border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer' },
+      destructiveBtnStyle: { background: tB.destructiveBg, color: tB.destructiveText, border: 'none', borderRadius: 7, padding: '8px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' },
+      disabledPrimaryBtnStyle: { background: tB.secondaryBg, color: tB.muted, border: '1px solid ' + tB.secondaryBorder, borderRadius: 7, padding: '8px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'not-allowed', whiteSpace: 'nowrap' },
+      activeTagStyle: { background: tB.tagBg, color: tB.tagText, fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 999, marginLeft: 8 },
+
+      budgetLabelInputPlaceholderStyle: { background: tB.inputBg, border: '1px solid ' + tB.inputBorder, borderRadius: 6, padding: '7px 10px', fontSize: 12.5, color: tB.muted },
+      budgetAmountInputPlaceholderStyle: { fontFamily: "'IBM Plex Mono',monospace", background: tB.inputBg, border: '1px solid ' + tB.inputBorder, borderRadius: 6, padding: '7px 10px', fontSize: 12.5, color: tB.muted, textAlign: 'right' },
+      budgetAmountInputStyle: { fontFamily: "'IBM Plex Mono',monospace", background: tB.inputBg, border: '1px solid ' + tB.inputBorder, borderRadius: 6, padding: '7px 10px', fontSize: 12.5, fontWeight: 600 },
+
+      monoPosStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: tB.positive },
+      monoNegStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 700, color: tB.negative },
+      monoBoldStyle: { fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, fontWeight: 800 }
+    };
+
+    b.navItems = this.buildNavB(tB, st.b_screen, (id) => this.setState({ b_screen: id }));
+    b.onCaseChange = (e) => this.setState({ b_case: e.target.value });
+    b.caseOptions = this.buildCaseOptionsB(tB, allCases, st.b_case);
+
+    const maxCatB = Math.max(...caseDataB.categories.map(c => c.value));
+    b.caseData = {
+      ...caseDataB,
+      categories: caseDataB.categories.map((c, i) => ({
+        ...c, fmt: fmtEUR(c.value),
+        dotStyle: { width: 8, height: 8, borderRadius: 999, background: CAT_COLORS[i % CAT_COLORS.length], display: 'inline-block', marginRight: 8 },
+        barStyle: { width: (c.value / maxCatB * 100) + '%', height: '100%', borderRadius: 999, background: CAT_COLORS[i % CAT_COLORS.length] }
+      })),
+      budget: caseDataB.budget.map(g => {
+        const totalM = g.items.reduce((s, it) => s + it.m, 0);
+        const totalA = g.items.reduce((s, it) => s + it.a, 0);
+        return {
+          ...g, totalMFmt: fmtEUR(totalM), totalAFmt: fmtEUR(totalA),
+          items: g.items.map(it => ({ ...it, mFmt: fmtNum(it.m), aFmt: fmtEUR(it.a) }))
+        };
+      }),
+      history: caseDataB.history.map(h => ({
+        ...h,
+        incomeFmt: '+' + fmtEUR(h.income), expenseFmt: '-' + fmtEUR(h.expense), savingsFmt: fmtEUR(h.savings),
+        incomeBarStyle2: { width: Math.min(100, h.income / 2500 * 100) + '%', height: '100%', borderRadius: 999, background: tB.positive },
+        expenseBarStyle2: { width: Math.min(100, h.expense / 2500 * 100) + '%', height: '100%', borderRadius: 999, background: tB.negative }
+      }))
+    };
+
+    return { canvasStyle, introStyle, optionWrapStyle, badgeRowStyle, badgeStyle, a, b };
+  }
+}
+
+</script>
+</body>
+</html>
